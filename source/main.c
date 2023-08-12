@@ -7,6 +7,8 @@
 #define GS_ASSET_IMPL
 #include <gs/util/gs_asset.h>
 
+#define GS_API_DECL
+
 #include <time.h>
 
 /*===========================
@@ -73,6 +75,7 @@ typedef struct game_data_t
     gs_asset_manager_t  gsa;
     rabbit_t            rabbit;
     wolf_t              wolf[WOLF_COUNT];
+    clock_t             start_time;
 } game_data_t;
 
 // Forward declares
@@ -93,6 +96,7 @@ void app_init()
 {
     // Pegue o ponteiro de dados do usuário da estrutura
     game_data_t* gd = gs_user_data(game_data_t);
+    gd->start_time = clock();
 
     // Inicializar utilitários
     gd->gcb = gs_command_buffer_new();
@@ -127,6 +131,7 @@ void app_update()
 
 void app_shutdown()
 {
+
 }
 
 gs_aabb_t rabbit_aabb(rabbit_t rabbit)  // colisão
@@ -178,6 +183,9 @@ void init_wolf(game_data_t* gd)
 void update_rabbit(game_data_t* gd)
 {
     gs_vec2 ws = window_size();
+    float* init = NULL;
+    float* end = NULL;
+    double cpu_time_used;
     float* y = NULL;
     float* x = NULL;
     float miny = GAME_FIELDY;
@@ -207,6 +215,12 @@ void update_rabbit(game_data_t* gd)
     // Rabbit ganha
     if (*y < (y_offset))
     {
+        init = &gd->start_time;
+        end = clock();
+        // Calcula o tempo de CPU usado em segundos
+        cpu_time_used = ((double) (end - init)) / CLOCKS_PER_SEC;
+        
+        gs_println("Seu score: %.f", cpu_time_used * -1);  
         gs_quit();
     }
 }
